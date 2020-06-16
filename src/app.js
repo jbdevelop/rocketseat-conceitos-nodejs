@@ -1,33 +1,79 @@
-const express = require("express");
-const cors = require("cors");
+const express = require("express")
+const cors = require("cors")
 
-// const { uuid } = require("uuidv4");
+const { uuid } = require("uuidv4")
 
-const app = express();
+const app = express()
 
-app.use(express.json());
-app.use(cors());
+app.use(express.json())
+app.use(cors())
 
-const repositories = [];
+const repositories = []
 
 app.get("/repositories", (request, response) => {
-  // TODO
-});
+  return response.status(200).json(repositories)
+})
 
 app.post("/repositories", (request, response) => {
-  // TODO
-});
+  const { title, url, techs } = request.body
+
+  const repository = {
+    id: uuid(),
+    title,
+    url,
+    techs,
+    likes: 0,
+  }
+
+  repositories.push(repository)
+
+  return response.status(200).json(repository)
+})
 
 app.put("/repositories/:id", (request, response) => {
-  // TODO
-});
+  const { id } = request.params
+
+  const { url, title, techs } = request.body
+
+  const repository = repositories.find(repository => repository.id === id)
+
+  if (!repository) {
+    return response.status(400).json({ error: "Repository not found" })
+  }
+
+  repository.url = url
+  repository.title = title
+  repository.techs = techs
+
+  return response.status(200).json(repository)
+})
 
 app.delete("/repositories/:id", (request, response) => {
-  // TODO
-});
+  const { id } = request.params
+
+  const repositoryIndex = repositories.findIndex(repository => repository.id === id)
+
+  if (repositoryIndex < 0) {
+    return response.status(400).json('Can\'t delete repository that doesn\'t exists')
+  }
+
+  repositories.splice(repositoryIndex, 1)
+
+  return response.status(204).send()
+})
 
 app.post("/repositories/:id/like", (request, response) => {
-  // TODO
-});
+  const { id } = request.params
 
-module.exports = app;
+  const repository = repositories.find(repository => repository.id === id)
+
+  if (!repository) {
+    return response.status(400).json("Repository not found")
+  }
+
+  repository.likes++
+
+  return response.status(200).json(repository)
+})
+
+module.exports = app
